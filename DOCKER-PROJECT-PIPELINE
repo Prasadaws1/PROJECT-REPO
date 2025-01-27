@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk-17'
+        nodejs 'node-js'
+    }
+    environment {
+        SCANNER_HOME = tool 'my-sonar'
+    }
+    stages {
+        stage ("clean") {
+            steps {
+                cleanWs()
+            }
+        }
+        stage ("code") {
+            steps {
+                git "https://github.com/Prasadaws1/Zomato-Project.git"
+            }
+        }
+        stage ("qua") {
+            steps {
+               withSonarQubeEnv('my-sonar') {
+                   sh ''' $SCANNER_HOME/bin/sonar-scanner\
+                      -Dsonar.projectName=zomato \
+                      -Dsonar.projectKey=zomato '''
+                } 
+            }
+        }
+        stage ("bild") {
+            steps {
+                sh 'npm install'
+            }
+        }
+        stage ("owasap") {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'dp-check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        stage ("image-build") {
+            steps {
+                sh "dokcer build -t prasadramanaboina/netflix:project22 ."
+            }
+        }
+        stage ("trivy-filesystem") {
+            steps {
+                sh "trivy fs . > trivy.txt"
+            }
+        }
+        stgae ("image scan")
+        steps {
+            sh "trivy image prasadramanaboina/netflix:project22"
+        }
+        stage ("docker-image") {
+            steps {
+                script {
+                    withDockerRegistry("docker-idpassword") {
+                      sh "docker push prasadramanaboina/netflix:project22"
+                    }
+                }
+            }
+        }
+        stage ("container") {
+            steps {
+                sh "docker run -itd --name net-cont -p 8082:80 prasadramanaboina/netflix:project22"
+            }
+        }
+    }
