@@ -1,24 +1,24 @@
 pipeline {
     agent any
     tools {
-        jdk 'jdk-17'
+        jdk 'jdk-17'   >>>>>>>>>>>>>>> TOOLS ARE USED
         nodejs 'node-js'
     }
     environment {
         SCANNER_HOME = tool 'my-sonar'
     }
     stages {
-        stage ("clean") {
+        stage ("clean") {              >>>>>>>>>>>>>>>>>>>>>>. CLEAN WORK SPACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             steps {
                 cleanWs()
             }
         }
         stage ("code") {
             steps {
-                git "https://github.com/Prasadaws1/Zomato-Project.git"
+                git "https://github.com/Prasadaws1/Zomato-Project.git" >>>>>>>>>>>>>>>>>>>>.GET CODE FORM GIT >>>>>>>>>>>>>>>>>>>>>
             }
         }
-        stage ("qua") {
+        stage ("qua") {                                               >>>>>>>>>>>>>>>>>>>> SCAN THE CODE WITH SONAR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             steps {
                withSonarQubeEnv('my-sonar') {
                    sh ''' $SCANNER_HOME/bin/sonar-scanner\
@@ -27,32 +27,32 @@ pipeline {
                 } 
             }
         }
-        stage ("bild") {
+        stage ("bild") {                                           >>>>>>>>>>>>>>>>>>>>>>>>>>>... BUILD AN DINSTALL DEPENDENCIES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             steps {
                 sh 'npm install'
             }
         }
-        stage ("owasap") {
+        stage ("owasap") {                                  >>>>>>>>>>>>>>>>>>>>>>>>>>... OWSAP USED TO CHECK DEPENDENCIES ARE INSTALL OR NOT >>>>>>>>>>>>>>>>>>>>>>>>>>
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'dp-check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
-        stage ("image-build") {
+        stage ("image-build") {                               >>>>>>>>>>>>>>>>>>>. BUILD IMAGE WITH DOCKER >>>>>>>>>>>>>>>>>>>>>
             steps {
                 sh "dokcer build -t prasadramanaboina/netflix:project22 ."
             }
         }
-        stage ("trivy-filesystem") {
+        stage ("trivy-filesystem") {                           >>>>>>>>>>>>>>>>. CREATE FILE SYSTEM WITH TRIVY >>>>>>>>>>>>>>>>>>>>>>>>>>
             steps {
                 sh "trivy fs . > trivy.txt"
             }
         }
-        stgae ("image scan")
+        stgae ("image scan")                                      >>>>>>>>>>>>>>>>>>>>>>>.. SCAN THE IMAGE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         steps {
             sh "trivy image prasadramanaboina/netflix:project22"
         }
-        stage ("docker-image") {
+        stage ("docker-image") {                               >>>>>>>>>>>>>>>>>>>>>>>>>>>>. PUSH THE IMAGE TO DOCKER-HUB>>>>>>>>>>>>>>>>>>>>>>>>>
             steps {
                 script {
                     withDockerRegistry("docker-idpassword") {
@@ -61,7 +61,7 @@ pipeline {
                 }
             }
         }
-        stage ("container") {
+        stage ("container") {                                  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.. CREATE CONTAINER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             steps {
                 sh "docker run -itd --name net-cont -p 8082:80 prasadramanaboina/netflix:project22"
             }
